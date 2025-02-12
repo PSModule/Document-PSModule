@@ -28,6 +28,14 @@ jobs:
       - name: Initialize environment
         uses: PSModule/Initialize-PSModule@main
 
+      - name: Upload module artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module
+          path: tests/outputs/modules
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Action-Test
         uses: ./
         with:
