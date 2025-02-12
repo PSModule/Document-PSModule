@@ -275,7 +275,7 @@ Write-Verbose "[$scriptName] - [/public/Get-PSModuleTest.ps1] - Done"
 #region - From /public/New-PSModuleTest.ps1
 Write-Verbose "[$scriptName] - [/public/New-PSModuleTest.ps1] - Importing"
 
-#Requires -Modules @{ModuleName='PSSemVer'; ModuleVersion='1.0'}
+#Requires -Modules @{ModuleName='PSSemVer'; ModuleVersion='1.1.4'}
 
 function New-PSModuleTest {
     <#
