@@ -50,7 +50,7 @@ function Build-PSModuleDocumentation {
 
 
     LogGroup 'Build docs - Generate markdown help' {
-        $ModuleName | Remove-Module -Force
+        $ModuleName | Remove-Module -Force -ErrorAction SilentlyContinue
         Import-Module -Name $ModuleName -Force -RequiredVersion '999.0.0'
         Write-Host ($ModuleName | Get-Module)
         $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
