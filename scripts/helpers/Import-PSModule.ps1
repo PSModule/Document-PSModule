@@ -1,4 +1,4 @@
-﻿#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
+﻿#Requires -Modules Utilities
 
 function Import-PSModule {
     <#
