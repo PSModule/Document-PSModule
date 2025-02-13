@@ -30,19 +30,6 @@ LogGroup 'Loading inputs' {
     Write-Host "Docs output path:    [$docsOutputFolderPath]"
 }
 
-LogGroup 'Build local scripts' {
-    Write-Host 'Execution order:'
-    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name | Resolve-Path -Relative
-    $scripts | ForEach-Object {
-        Write-Host " - $_"
-    }
-    $scripts | ForEach-Object {
-        LogGroup "Build local scripts - [$_]" {
-            . $_
-        }
-    }
-}
-
 $params = @{
     ModuleName              = $moduleName
     ModuleSourceFolderPath  = $moduleSourceFolderPath
