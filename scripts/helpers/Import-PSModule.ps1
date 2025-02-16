@@ -1,19 +1,22 @@
-﻿#Requires -Modules Utilities
-
-function Import-PSModule {
+﻿function Import-PSModule {
     <#
-        .SYNOPSIS
-        Imports a build PS module.
+    .SYNOPSIS
+    Imports a build PS module.
 
-        .DESCRIPTION
-        Imports a build PS module.
+    .DESCRIPTION
+    Imports a build PS module.
 
-        .EXAMPLE
-        Import-PSModule -SourceFolderPath $ModuleFolderPath -ModuleName $ModuleName
+    .EXAMPLE
+    Import-PSModule -SourceFolderPath $ModuleFolderPath -ModuleName $ModuleName
 
-        Imports a module located at $ModuleFolderPath with the name $ModuleName.
+    Imports a module located at $ModuleFolderPath with the name $ModuleName.
     #>
     [CmdletBinding()]
+    #Requires -Modules Utilities
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
