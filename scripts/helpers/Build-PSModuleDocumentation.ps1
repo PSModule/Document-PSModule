@@ -1,19 +1,22 @@
-﻿#Requires -Modules GitHub
-#Requires -Modules Utilities
-
-function Build-PSModuleDocumentation {
+﻿function Build-PSModuleDocumentation {
     <#
-        .SYNOPSIS
-        Builds a module.
+    .SYNOPSIS
+    Builds a module.
 
-        .DESCRIPTION
-        Builds a module.
+    .DESCRIPTION
+    Builds a module.
     #>
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
+    #Requires -Modules GitHub
+    #Requires -Modules Utilities
     param(
         # Name of the module.
         [Parameter(Mandatory)]
