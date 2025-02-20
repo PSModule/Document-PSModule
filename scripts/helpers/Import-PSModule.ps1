@@ -33,11 +33,7 @@
     $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
     Write-Host "Manifest file path: [$($manifestFile.FullName)]" -Verbose
-    $existingModule = Get-Module -Name $ModuleName -ListAvailable
-    $existingModule | Remove-Module -Force -Verbose
-    $existingModule.RequiredModules | ForEach-Object { $_ | Remove-Module -Force -Verbose -ErrorAction SilentlyContinue }
-    $existingModule.NestedModules | ForEach-Object { $_ | Remove-Module -Force -Verbose -ErrorAction SilentlyContinue }
-    # Get-InstalledPSResource | Where-Object Name -EQ $ModuleName | Uninstall-PSResource -SkipDependencyCheck -Verbose:$false
+    Remove-PSModule -Name $ModuleName
     Resolve-PSModuleDependency -ManifestFilePath $manifestFile
     Import-Module -Name $ModuleName -RequiredVersion '999.0.0'
 
@@ -45,7 +41,7 @@
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
     $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize
     Write-Host 'List commands'
-    Write-Host (Get-Command -Module $moduleName | Format-Table -AutoSize | Out-String)
+    Write-Host (Get-Command -Module $moduleName -ListImported | Format-Table -AutoSize | Out-String)
 
     if ($ModuleName -notin $availableModules.Name) {
         throw 'Module not found'

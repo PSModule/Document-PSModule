@@ -53,10 +53,15 @@
 
     LogGroup 'Build docs - Generate markdown help' {
         Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-        $ModuleName | Remove-Module -Force -ErrorAction SilentlyContinue
         Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
         Write-Host ($ModuleName | Get-Module)
         $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+            $fileName = $_.Name
+            LogGroup " - [$fileName]" {
+                Show-FileContent -Path $_
+            }
+        }
     }
 
     LogGroup 'Build docs - Fix markdown code blocks' {
