@@ -23,6 +23,7 @@ LogGroup 'Loading inputs' {
     if (-not (Test-Path -Path $moduleSourceFolderPath)) {
         throw "Module path [$moduleSourceFolderPath] does not exist."
     }
+    Write-Host "Module source path:  [$moduleSourceFolderPath]"
 
     $modulesOutputFolderPath = Join-Path -Path $env:GITHUB_ACTION_INPUT_Path 'outputs/module'
     Write-Host "Module output path:  [$modulesOutputFolderPath]"
