@@ -19,7 +19,7 @@ LogGroup 'Loading inputs' {
     $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
     Write-Host "Module name:         [$moduleName]"
 
-    $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_ACTION_INPUT_Path 'src'
+    $moduleSourceFolderPath = Resolve-Path -Path "$env:GITHUB_ACTION_INPUT_Path/src"
     if (-not (Test-Path -Path $moduleSourceFolderPath)) {
         throw "Module path [$moduleSourceFolderPath] does not exist."
     }

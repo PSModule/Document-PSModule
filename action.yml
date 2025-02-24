@@ -10,9 +10,9 @@ inputs:
     description: Name of the module to process.
     required: false
   Path:
-    description: Path to the folder where the modules are located.
+    description: The path to the root of the repo.
     required: false
-    default: src
+    default: ${{ github.workspace }}
   Debug:
     description: Enable debug output.
     required: false
