@@ -19,18 +19,14 @@ LogGroup 'Loading inputs' {
     $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
     Write-Host "Module name:         [$moduleName]"
 
-    $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path/$moduleName
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path
-    }
-    Write-Host "Source module path:  [$moduleSourceFolderPath]"
+    $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path/src
     if (-not (Test-Path -Path $moduleSourceFolderPath)) {
         throw "Module path [$moduleSourceFolderPath] does not exist."
     }
 
-    $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
-    Write-Host "Modules output path: [$modulesOutputFolderPath]"
-    $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
+    $modulesOutputFolderPath = Join-Path $env:GITHUB_ACTION_INPUT_Path -ChildPath 'outputs/module'
+    Write-Host "Module output path:  [$modulesOutputFolderPath]"
+    $docsOutputFolderPath = Join-Path $env:GITHUB_ACTION_INPUT_Path -ChildPath 'outputs/docs'
     Write-Host "Docs output path:    [$docsOutputFolderPath]"
 }
 
