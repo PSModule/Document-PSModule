@@ -33,7 +33,6 @@ runs:
   using: composite
   steps:
     - name: Document-PSModule
-      uses: PSModule/GitHub-Script@v1
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
