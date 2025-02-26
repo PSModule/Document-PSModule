@@ -45,7 +45,6 @@
     Write-Host "Docs output folder:   [$docsOutputFolder]"
 
     Write-Host '::group::Build docs - Generate markdown help'
-    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
     Import-PSModule -Path $ModuleOutputFolder
     Write-Host ($ModuleName | Get-Module)
     $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
