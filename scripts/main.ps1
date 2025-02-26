@@ -5,6 +5,11 @@
 [CmdletBinding()]
 param()
 
+'platyPS' | ForEach-Object {
+    Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+    Import-Module -Name $_
+}
+
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
 Write-Host "::group::Loading helper scripts from [$path]"
 Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
