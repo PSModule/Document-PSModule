@@ -1,15 +1,17 @@
 ﻿function Resolve-PSModuleDependency {
     <#
         .SYNOPSIS
-        Resolve dependencies for a module based on the manifest file.
+            Resolves module dependencies from a manifest file using Install-PSResource.
 
         .DESCRIPTION
-        Resolve dependencies for a module based on the manifest file, following PSModuleInfo structure
+            Reads a module manifest (PSD1) and for each required module converts the old
+            Install-Module parameters (MinimumVersion, MaximumVersion, RequiredVersion)
+            into a single NuGet version range string for Install-PSResource's –Version parameter.
+            (Note: If RequiredVersion is set, that value takes precedence.)
 
         .EXAMPLE
-        Resolve-PSModuleDependency -Path 'C:\MyModule\MyModule.psd1'
-
-        Installs all modules defined in the manifest file, following PSModuleInfo structure.
+            Resolve-PSModuleDependency -ManifestFilePath 'C:\MyModule\MyModule.psd1'
+    Installs all modules defined in the manifest file, following PSModuleInfo structure.
 
         .NOTES
         Should later be adapted to support both pre-reqs, and dependencies.
@@ -27,47 +29,82 @@
         [string] $ManifestFilePath
     )
 
+    # Helper: Converts the legacy version parameters into a NuGet version range.
+    function Convert-VersionSpec {
+        param(
+            [string]$MinimumVersion,
+            [string]$MaximumVersion,
+            [string]$RequiredVersion
+        )
+        if ($RequiredVersion) {
+            # Exact match – note that for an exact version, using bracket notation
+            # helps ensure that Install-PSResource looks for that version only.
+            return "[$RequiredVersion]"
+        } elseif ($MinimumVersion -and $MaximumVersion) {
+            # Both bounds provided; note that this makes both ends inclusive.
+            return "[$MinimumVersion,$MaximumVersion]"
+        } elseif ($MinimumVersion) {
+            # Only a minimum is provided.
+            # Using the notation “[1.0.0.0, ]” ensures a minimum-inclusive search.
+            return "[$MinimumVersion, ]"
+        } elseif ($MaximumVersion) {
+            # Only a maximum is provided; here we use an open lower bound.
+            return "(, $MaximumVersion]"
+        } else {
+            return $null
+        }
+    }
+
     Write-Host 'Resolving dependencies'
 
     $manifest = Import-PowerShellDataFile -Path $ManifestFilePath
     Write-Host " - Reading [$ManifestFilePath]"
-    Write-Host " - Found [$($manifest.RequiredModules.Count)] modules to install"
+    Write-Host " - Found [$($manifest.RequiredModules.Count)] module(s) to install"
 
     foreach ($requiredModule in $manifest.RequiredModules) {
-        $installParams = @{}
+        $installParams = @{
+            Force   = $true
+            Verbose = $false
+        }
 
         if ($requiredModule -is [string]) {
             $installParams.Name = $requiredModule
         } else {
             $installParams.Name = $requiredModule.ModuleName
-            $installParams.MinimumVersion = $requiredModule.ModuleVersion
-            $installParams.RequiredVersion = $requiredModule.RequiredVersion
-            $installParams.MaximumVersion = $requiredModule.MaximumVersion
-        }
-        $installParams.Force = $true
-        $installParams.Verbose = $false
 
+            # Convert legacy version parameters into the new –Version spec.
+            $versionSpec = Convert-VersionSpec `
+                -MinimumVersion $requiredModule.ModuleVersion `
+                -MaximumVersion $requiredModule.MaximumVersion `
+                -RequiredVersion $requiredModule.RequiredVersion
+
+            if ($versionSpec) {
+                $installParams.Version = $versionSpec
+            }
+        }
+
+        Write-Host " - [$($installParams.Name)] - Installing module with version spec: $($installParams.Version)"
         $VerbosePreferenceOriginal = $VerbosePreference
         $VerbosePreference = 'SilentlyContinue'
-        Write-Host " - [$($installParams.Name)] - Installing module"
-        $Count = 5
-        $Delay = 10
-        for ($i = 0; $i -lt $Count; $i++) {
+
+        # Basic retry logic in case of transient errors.
+        $retryCount = 5
+        $retryDelay = 10
+        for ($i = 0; $i -lt $retryCount; $i++) {
             try {
-                Install-Module @installParams
+                Install-PSResource @installParams
                 break
             } catch {
-                Write-Warning 'The command:'
-                Write-Warning $Run.ToString()
-                Write-Warning "failed with error: $_"
-                if ($i -eq $Count - 1) {
+                Write-Warning "Installation of $($installParams.Name) failed with error: $_"
+                if ($i -eq $retryCount - 1) {
                     throw
                 }
-                Write-Warning "Retrying in $Delay seconds..."
-                Start-Sleep -Seconds $Delay
+                Write-Warning "Retrying in $retryDelay seconds..."
+                Start-Sleep -Seconds $retryDelay
             }
         }
         $VerbosePreference = $VerbosePreferenceOriginal
+
         Write-Host " - [$($installParams.Name)] - Importing module"
         $VerbosePreferenceOriginal = $VerbosePreference
         $VerbosePreference = 'SilentlyContinue'
