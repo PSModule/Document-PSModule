@@ -1,4 +1,4 @@
-name: Build-PSModuleDocumentation (by PSModule)
+name: Document-PSModule (by PSModule)
 description: Build documentation for a PowerShell module.
 author: PSModule
 branding:
@@ -10,25 +10,9 @@ inputs:
     description: Name of the module to process.
     required: false
   Path:
-    description: Path to the folder where the modules are located.
+    description: The path to the root of the repo.
     required: false
-    default: src
-  ModulesOutputPath:
-    description: Path to the folder where the built modules are outputted.
-    required: false
-    default: outputs/modules
-  DocsOutputPath:
-    description: Path to the folder where the built docs are outputted.
-    required: false
-    default: outputs/docs
-  ModuleArtifactName:
-    description: Name of the module artifact to upload.
-    required: false
-    default: module
-  DocsArtifactName:
-    description: Name of the docs artifact to upload.
-    required: false
-    default: docs
+    default: ${{ github.workspace }}
   Debug:
     description: Enable debug output.
     required: false
@@ -48,32 +32,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Download module artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.ModuleArtifactName }}
-        path: ${{ inputs.ModulesOutputPath }}
-
-    - name: Run Build-PSModuleDocumentation
-      uses: PSModule/GitHub-Script@v1
+    - name: Document-PSModule
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
-        GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
-        GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
-      with:
-        Debug: ${{ inputs.Debug }}
-        Prerelease: ${{ inputs.Prerelease }}
-        Verbose: ${{ inputs.Verbose }}
-        Version: ${{ inputs.Version }}
-        Script: |
-          # Build-PSModuleDocumentation
-          ${{ github.action_path }}\scripts\main.ps1
-
-    - name: Upload docs artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ inputs.DocsArtifactName }}
-        path: ${{ inputs.DocsOutputPath }}
-        if-no-files-found: error
-        retention-days: 1
+      shell: pwsh
+      run: |
+        # Build-PSModuleDocumentation
+        ${{ github.action_path }}\scripts\main.ps1
