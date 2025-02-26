@@ -62,10 +62,7 @@
     Write-Host " - Found [$($manifest.RequiredModules.Count)] module(s) to install"
 
     foreach ($requiredModule in $manifest.RequiredModules) {
-        $installParams = @{
-            Force   = $true
-            Verbose = $false
-        }
+        $installParams = @{}
 
         if ($requiredModule -is [string]) {
             $installParams.Name = $requiredModule
