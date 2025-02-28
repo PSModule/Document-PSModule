@@ -9,10 +9,6 @@ inputs:
   Name:
     description: Name of the module to process.
     required: false
-  Path:
-    description: The path to the root of the repo.
-    required: false
-    default: ${{ github.workspace }}
   Debug:
     description: Enable debug output.
     required: false
@@ -28,6 +24,10 @@ inputs:
     description: Allow prerelease versions if available.
     required: false
     default: 'false'
+  WorkingDirectory:
+    description: The working directory where the script will run from.
+    required: false
+    default: ${{ github.workspace }}
 
 runs:
   using: composite
@@ -35,8 +35,8 @@ runs:
     - name: Document-PSModule
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
-        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
       shell: pwsh
+      working-directory: ${{ inputs.WorkingDirectory }}
       run: |
         # Build-PSModuleDocumentation
-        ${{ github.action_path }}\scripts\main.ps1
+        ${{ github.action_path }}/scripts/main.ps1

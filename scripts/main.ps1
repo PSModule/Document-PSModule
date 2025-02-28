@@ -22,15 +22,12 @@ $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
 $moduleName = [string]::IsNullOrEmpty($env:GITHUB_ACTION_INPUT_Name) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
 Write-Host "Module name:         [$moduleName]"
 
-$moduleSourceFolderPath = Resolve-Path -Path "$env:GITHUB_ACTION_INPUT_Path/src"
-if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-    throw "Module path [$moduleSourceFolderPath] does not exist."
-}
+$moduleSourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
 Write-Host "Module source path:  [$moduleSourceFolderPath]"
 
-$modulesOutputFolderPath = Join-Path -Path $env:GITHUB_ACTION_INPUT_Path 'outputs/module'
+$modulesOutputFolderPath = New-Item -Path 'outputs/module' -Force
 Write-Host "Module output path:  [$modulesOutputFolderPath]"
-$docsOutputFolderPath = Join-Path -Path $env:GITHUB_ACTION_INPUT_Path 'outputs/docs'
+$docsOutputFolderPath = New-Item -Path 'outputs/docs' -Force
 Write-Host "Docs output path:    [$docsOutputFolderPath]"
 
 $params = @{
