@@ -25,9 +25,9 @@ Write-Host "Module name:         [$moduleName]"
 $moduleSourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
 Write-Host "Module source path:  [$moduleSourceFolderPath]"
 
-$modulesOutputFolderPath = New-Item -Path 'outputs/module' -Force
+$modulesOutputFolderPath = Resolve-Path -Path 'outputs/module' | Select-Object -ExpandProperty Path
 Write-Host "Module output path:  [$modulesOutputFolderPath]"
-$docsOutputFolderPath = New-Item -Path 'outputs/docs' -Force
+$docsOutputFolderPath = Resolve-Path -Path 'outputs/docs' | Select-Object -ExpandProperty Path
 Write-Host "Docs output path:    [$docsOutputFolderPath]"
 
 $params = @{
