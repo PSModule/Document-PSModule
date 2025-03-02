@@ -90,13 +90,15 @@
     $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
-        Write-Host "Processing:        $file"
+        $relPath = [System.IO.Path]::GetRelativePath($DocsOutputFolder.FullName, $file.FullName)
+        Write-Host " - $relPath"
+        Write-Host "   Path: $file"
 
         # find the source code file that matches the markdown file
         $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
-        Write-Host "Found script path: $scriptPath"
+        Write-Host "    PS1 path: $scriptPath"
         $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
-        Write-Host "Doc file path:     $docsFilePath"
+        Write-Host "    MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
@@ -104,9 +106,12 @@
     # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
-        Write-Host "Processing:        $file"
+        $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
+        Write-Host " - $relPath"
+        Write-Host "   Path: $file"
+
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-        Write-Host "Doc file path:     $docsFilePath"
+        Write-Host "    MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
