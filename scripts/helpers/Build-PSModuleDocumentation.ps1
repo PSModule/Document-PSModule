@@ -109,10 +109,10 @@
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
-        Write-Host "   Path:    $file"
+        Write-Host "   Path:     $file"
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-        Write-Host "   MD path: $docsFilePath"
+        Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
