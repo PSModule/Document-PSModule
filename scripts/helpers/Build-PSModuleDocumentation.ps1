@@ -92,7 +92,7 @@
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($DocsOutputFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
-        Write-Host "   Path: $file"
+        Write-Host "   Path:     $file"
 
         # find the source code file that matches the markdown file
         $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
@@ -109,10 +109,10 @@
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
-        Write-Host "   Path: $file"
+        Write-Host "   Path:    $file"
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-        Write-Host "   MD path:  $docsFilePath"
+        Write-Host "   MD path: $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
