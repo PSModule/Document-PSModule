@@ -22,15 +22,9 @@ Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | Fo
 Write-Host '::group::Loading inputs'
 $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
 $moduleName = [string]::IsNullOrEmpty($env:GITHUB_ACTION_INPUT_Name) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
-Write-Host "Module name:         [$moduleName]"
-
 $moduleSourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
-Write-Host "Module source path:  [$moduleSourceFolderPath]"
-
 $modulesOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/module'
-Write-Host "Module output path:  [$modulesOutputFolderPath]"
 $docsOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/docs'
-Write-Host "Docs output path:    [$docsOutputFolderPath]"
 
 $params = @{
     ModuleName              = $moduleName
@@ -38,5 +32,7 @@ $params = @{
     ModulesOutputFolderPath = $modulesOutputFolderPath
     DocsOutputFolderPath    = $docsOutputFolderPath
 }
+
+[pscustomobject]$params | Format-List | Out-String
 
 Build-PSModuleDocumentation @params

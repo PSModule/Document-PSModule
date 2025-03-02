@@ -30,21 +30,22 @@
     )
 
     Write-Host "::group::Documenting module [$ModuleName]"
-    Write-Host "Source path:          [$ModuleSourceFolderPath]"
+    [pscustomobject]@{
+        ModuleName              = $ModuleName
+        ModuleSourceFolderPath  = $ModuleSourceFolderPath
+        ModulesOutputFolderPath = $ModulesOutputFolderPath
+        DocsOutputFolderPath    = $DocsOutputFolderPath
+    } | Format-List | Out-String
+
     if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
         Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
         exit 1
     }
     $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-    Write-Host "Module source folder: [$moduleSourceFolder]"
-
     $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-    Write-Host "Module output folder: [$moduleOutputFolder]"
-
     $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
-    Write-Host "Docs output folder:   [$docsOutputFolder]"
 
-    Write-Host '::group::Build docs - Generate markdown help'
+    Write-Host '::group::Build docs - Generate markdown help - Raw'
     Import-PSModule -Path $ModuleOutputFolder
     Write-Host ($ModuleName | Get-Module)
     $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
@@ -97,7 +98,7 @@
         $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
         Write-Host "Doc file path:     $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
-        New-Item -Path $docsFolderPath -ItemType Directory -Force
+        $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
     # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
@@ -107,14 +108,13 @@
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
         Write-Host "Doc file path:     $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
-        New-Item -Path $docsFolderPath -ItemType Directory -Force
+        $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
-        $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        Write-Host "::group:: - [$fileName] - [$hash]"
+        Write-Host "::group:: - [$fileName]"
         Show-FileContent -Path $_
     }
 }
