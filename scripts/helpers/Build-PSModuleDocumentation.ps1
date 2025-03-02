@@ -96,14 +96,15 @@
 
         # find the source code file that matches the markdown file
         $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
-        Write-Host "    PS1 path: $scriptPath"
+        Write-Host "   PS1 path: $scriptPath"
         $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
-        Write-Host "    MD path:  $docsFilePath"
+        Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
-    # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
+
+    Write-Host '::group::Build docs - Move markdown files from source files to docs'
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
@@ -111,12 +112,13 @@
         Write-Host "   Path: $file"
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-        Write-Host "    MD path:  $docsFilePath"
+        Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
 
+    Write-Host '────────────────────────────────────────────────────────────────────────────────'
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
