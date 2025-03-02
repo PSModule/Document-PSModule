@@ -5,6 +5,8 @@
 [CmdletBinding()]
 param()
 
+$PSStyle.OutputRendering = 'Ansi'
+
 'platyPS' | ForEach-Object {
     Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
     Import-Module -Name $_

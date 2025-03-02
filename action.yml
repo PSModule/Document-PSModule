@@ -33,9 +33,9 @@ runs:
   using: composite
   steps:
     - name: Document-PSModule
+      shell: pwsh
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
-      shell: pwsh
       working-directory: ${{ inputs.WorkingDirectory }}
       run: |
         # Build-PSModuleDocumentation
