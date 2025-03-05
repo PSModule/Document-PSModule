@@ -32,6 +32,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install-PSModuleHelpers
+      uses: PSModule/Install-PSModuleHelpers@v1
+
     - name: Document-PSModule
       shell: pwsh
       env:
