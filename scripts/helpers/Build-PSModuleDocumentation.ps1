@@ -46,7 +46,7 @@
     $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
-    Import-PSModule -Path $ModuleOutputFolder
+    Install-PSModule -Path $ModuleOutputFolder
     Write-Host ($ModuleName | Get-Module)
     $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
