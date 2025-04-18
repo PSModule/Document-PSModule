@@ -5,34 +5,42 @@
 [CmdletBinding()]
 param()
 
-#Requires -Modules Utilities
+$PSStyle.OutputRendering = 'Ansi'
+
+'platyPS' | ForEach-Object {
+    $name = $_
+    Write-Output "Installing module: $name"
+    $retryCount = 5
+    $retryDelay = 10
+    for ($i = 0; $i -lt $retryCount; $i++) {
+        try {
+            Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+            break
+        } catch {
+            Write-Warning "Installation of $($psResourceParams.Name) failed with error: $_"
+            if ($i -eq $retryCount - 1) {
+                throw
+            }
+            Write-Warning "Retrying in $retryDelay seconds..."
+            Start-Sleep -Seconds $retryDelay
+        }
+    }
+    Import-Module -Name $name
+}
 
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
-LogGroup "Loading helper scripts from [$path]" {
-    Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
-        Write-Host "$_"
-        . $_
-    }
+Write-Host "::group::Loading helper scripts from [$path]"
+Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
+    Write-Host "$_"
+    . $_
 }
 
-LogGroup 'Loading inputs' {
-    $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
-    Write-Host "Module name:         [$moduleName]"
-
-    $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path/$moduleName
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path
-    }
-    Write-Host "Source module path:  [$moduleSourceFolderPath]"
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        throw "Module path [$moduleSourceFolderPath] does not exist."
-    }
-
-    $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
-    Write-Host "Modules output path: [$modulesOutputFolderPath]"
-    $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
-    Write-Host "Docs output path:    [$docsOutputFolderPath]"
-}
+Write-Host '::group::Loading inputs'
+$env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
+$moduleName = [string]::IsNullOrEmpty($env:GITHUB_ACTION_INPUT_Name) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
+$moduleSourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
+$modulesOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/module'
+$docsOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/docs'
 
 $params = @{
     ModuleName              = $moduleName
@@ -40,5 +48,7 @@ $params = @{
     ModulesOutputFolderPath = $modulesOutputFolderPath
     DocsOutputFolderPath    = $docsOutputFolderPath
 }
+
+[pscustomobject]$params | Format-List | Out-String
 
 Build-PSModuleDocumentation @params

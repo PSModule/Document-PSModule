@@ -8,15 +8,9 @@
     #>
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSReviewUnusedParameter', '', Scope = 'Function',
-        Justification = 'LogGroup - Scoping affects the variables line of sight.'
-    )]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSAvoidUsingWriteHost', '', Scope = 'Function',
         Justification = 'Want to just write to the console, not the pipeline.'
     )]
-    #Requires -Modules GitHub
-    #Requires -Modules Utilities
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -35,95 +29,99 @@
         [string] $DocsOutputFolderPath
     )
 
-    LogGroup "Documenting module [$ModuleName]" {
-        Write-Host "Source path:          [$ModuleSourceFolderPath]"
-        if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
-            Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
-            exit 1
-        }
-        $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-        Write-Host "Module source folder: [$moduleSourceFolder]"
+    Write-Host "::group::Documenting module [$ModuleName]"
+    [pscustomobject]@{
+        ModuleName              = $ModuleName
+        ModuleSourceFolderPath  = $ModuleSourceFolderPath
+        ModulesOutputFolderPath = $ModulesOutputFolderPath
+        DocsOutputFolderPath    = $DocsOutputFolderPath
+    } | Format-List | Out-String
 
-        $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-        Write-Host "Module output folder: [$moduleOutputFolder]"
-
-        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
-        Write-Host "Docs output folder:   [$docsOutputFolder]"
+    if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
+        Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
+        exit 1
     }
+    $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
+    $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
 
-    LogGroup 'Build docs - Generate markdown help' {
-        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-        $ModuleName | Remove-Module -Force -ErrorAction SilentlyContinue
-        Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
-        Write-Host ($ModuleName | Get-Module)
-        $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
-    }
-
-    LogGroup 'Build docs - Fix markdown code blocks' {
-        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-            $content = Get-Content -Path $_.FullName
-            $fixedOpening = $false
-            $newContent = @()
-            foreach ($line in $content) {
-                if ($line -match '^```$' -and -not $fixedOpening) {
-                    $line = $line -replace '^```$', '```powershell'
-                    $fixedOpening = $true
-                } elseif ($line -match '^```.+$') {
-                    $fixedOpening = $true
-                } elseif ($line -match '^```$') {
-                    $fixedOpening = $false
-                }
-                $newContent += $line
-            }
-            $newContent | Set-Content -Path $_.FullName
-        }
-    }
-
-    LogGroup 'Build docs - Fix markdown escape characters' {
-        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-            $content = Get-Content -Path $_.FullName -Raw
-            $content = $content -replace '\\`', '`'
-            $content = $content -replace '\\\[', '['
-            $content = $content -replace '\\\]', ']'
-            $content = $content -replace '\\\<', '<'
-            $content = $content -replace '\\\>', '>'
-            $content = $content -replace '\\\\', '\'
-            $content | Set-Content -Path $_.FullName
-        }
-    }
-
-    LogGroup 'Build docs - Structure markdown files to match source files' {
-        $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
-        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-            $file = $_
-            Write-Host "Processing:        $file"
-
-            # find the source code file that matches the markdown file
-            $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
-            Write-Host "Found script path: $scriptPath"
-            $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
-            Write-Host "Doc file path:     $docsFilePath"
-            $docsFolderPath = Split-Path -Path $docsFilePath -Parent
-            New-Item -Path $docsFolderPath -ItemType Directory -Force
-            Move-Item -Path $file.FullName -Destination $docsFilePath -Force
-        }
-        # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
-        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-            $file = $_
-            Write-Host "Processing:        $file"
-            $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-            Write-Host "Doc file path:     $docsFilePath"
-            $docsFolderPath = Split-Path -Path $docsFilePath -Parent
-            New-Item -Path $docsFolderPath -ItemType Directory -Force
-            Move-Item -Path $file.FullName -Destination $docsFilePath -Force
-        }
-    }
-
+    Write-Host '::group::Build docs - Generate markdown help - Raw'
+    Install-PSModule -Path $ModuleOutputFolder
+    Write-Host ($ModuleName | Get-Module)
+    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
-        $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        LogGroup " - [$fileName] - [$hash]" {
-            Show-FileContent -Path $_
+        Write-Host "::group:: - [$fileName]"
+        Show-FileContent -Path $_
+    }
+
+    Write-Host '::group::Build docs - Fix markdown code blocks'
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName
+        $fixedOpening = $false
+        $newContent = @()
+        foreach ($line in $content) {
+            if ($line -match '^```$' -and -not $fixedOpening) {
+                $line = $line -replace '^```$', '```powershell'
+                $fixedOpening = $true
+            } elseif ($line -match '^```.+$') {
+                $fixedOpening = $true
+            } elseif ($line -match '^```$') {
+                $fixedOpening = $false
+            }
+            $newContent += $line
         }
+        $newContent | Set-Content -Path $_.FullName
+    }
+
+    Write-Host '::group::Build docs - Fix markdown escape characters'
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName -Raw
+        $content = $content -replace '\\`', '`'
+        $content = $content -replace '\\\[', '['
+        $content = $content -replace '\\\]', ']'
+        $content = $content -replace '\\\<', '<'
+        $content = $content -replace '\\\>', '>'
+        $content = $content -replace '\\\\', '\'
+        $content | Set-Content -Path $_.FullName
+    }
+
+    Write-Host '::group::Build docs - Structure markdown files to match source files'
+    $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $file = $_
+        $relPath = [System.IO.Path]::GetRelativePath($DocsOutputFolder.FullName, $file.FullName)
+        Write-Host " - $relPath"
+        Write-Host "   Path:     $file"
+
+        # find the source code file that matches the markdown file
+        $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
+        Write-Host "   PS1 path: $scriptPath"
+        $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
+        Write-Host "   MD path:  $docsFilePath"
+        $docsFolderPath = Split-Path -Path $docsFilePath -Parent
+        $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
+        Move-Item -Path $file.FullName -Destination $docsFilePath -Force
+    }
+
+    Write-Host '::group::Build docs - Move markdown files from source files to docs'
+    Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $file = $_
+        $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
+        Write-Host " - $relPath"
+        Write-Host "   Path:     $file"
+
+        $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
+        Write-Host "   MD path:  $docsFilePath"
+        $docsFolderPath = Split-Path -Path $docsFilePath -Parent
+        $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
+        Move-Item -Path $file.FullName -Destination $docsFilePath -Force
+    }
+
+    Write-Host '────────────────────────────────────────────────────────────────────────────────'
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $fileName = $_.Name
+        Write-Host "::group:: - [$fileName]"
+        Show-FileContent -Path $_
     }
 }
