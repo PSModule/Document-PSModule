@@ -1,6 +1,6 @@
 # Document-PSModule (by PSModule)
 
-A GitHub Action that automates the generation of documentation for PowerShell modules using markdown help files.
+A GitHub Action that automates the generation of documentation for PowerShell modules using Markdown help files.
 
 This GitHub Action is a part of the [PSModule framework](https://github.com/PSModule). It is recommended to use the
 [Process-PSModule workflow](https://github.com/PSModule/Process-PSModule) to automate the whole process of managing the PowerShell module.
@@ -10,10 +10,10 @@ This GitHub Action is a part of the [PSModule framework](https://github.com/PSMo
 This action:
 - Installs necessary modules, including `platyPS` for documentation generation.
 - Loads helper scripts required by the documentation process.
-- Generates markdown documentation from PowerShell module files.
-- Ensures markdown documentation is properly formatted, with correctly tagged PowerShell code blocks.
-- Adjusts markdown file paths to mirror the structure of the source PowerShell module files.
-- Outputs organized markdown documentation suitable for publishing or distribution.
+- Generates Markdown documentation from PowerShell module files.
+- Ensures Markdown documentation is properly formatted, with correctly tagged PowerShell code blocks.
+- Adjusts Markdown file paths to mirror the structure of the source PowerShell module files.
+- Outputs organized Markdown documentation suitable for publishing or distribution.
 
 ## Usage
 
