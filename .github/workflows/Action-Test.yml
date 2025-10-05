@@ -60,3 +60,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           VALIDATE_MARKDOWN: true
+          LOG_LEVEL: DEBUG
