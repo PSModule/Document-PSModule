@@ -44,22 +44,20 @@ jobs:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
 
-      - name: List files
-        shell: pwsh
-        run: |
-          Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
-
       - name: Get changes
         uses: PSModule/GitHub-Script@v1
         with:
           Script: |
-            git add tests/srcTestRepo/outputs/docs/
-            git commit -m "Update documentation"
+            LogGroup "List files" {
+              Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
+            }
+            LogGroup "Commit changes" {
+              git add tests/srcTestRepo/outputs/docs/
+              git commit -m "Update documentation"
+            }
 
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          # RUN_LOCAL: true
-          # DEFAULT_BRANCH: main
           VALIDATE_MARKDOWN: true
