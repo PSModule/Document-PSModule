@@ -49,13 +49,15 @@ jobs:
         run: |
           Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
 
+      - name: Get changes
+        shell: pwsh
+        run: |
+          git add tests/srcTestRepo/outputs/docs/
+          git status
+
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
-          DEFAULT_BRANCH: main
-          DEFAULT_WORKSPACE: tests/srcTestRepo/outputs/docs
-          ENABLE_GITHUB_ACTIONS_GROUP_TITLE: true
           GITHUB_TOKEN: ${{ github.token }}
-          RUN_LOCAL: true
+          VALIDATE_ALL_CODEBASE: true
           VALIDATE_MARKDOWN: true
-
