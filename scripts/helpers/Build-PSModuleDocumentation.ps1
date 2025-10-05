@@ -50,7 +50,7 @@
     Import-Module -Name $ModuleName -Force -Verbose
     $moduleInfo = Get-Module $ModuleName
     Write-Host $moduleInfo
-    $null = New-MarkdownCommandHelp -ModuleInfo $moduleInfo -OutputFolder $DocsOutputFolder -Force -Verbose
+    $null = New-MarkdownCommandHelp -ModuleInfo $moduleInfo -OutputFolder $DocsOutputFolder -Force -Verbose -Debug
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
