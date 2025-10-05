@@ -44,9 +44,7 @@ jobs:
         env:
           FILTER_REGEX_INCLUDE: outputs/docs
           DEFAULT_WORKSPACE: tests/srcTestRepo
-          ENABLE_GITHUB_ACTIONS_GROUP_TITLE: true
           GITHUB_TOKEN: ${{ github.token }}
-          RUN_LOCAL: true
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_BIOME_LINT: false
