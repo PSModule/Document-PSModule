@@ -42,6 +42,11 @@ jobs:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
 
+      - name: List files
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Force -File | Select-Object -ExpandProperty FullName | Sort-Object
+
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
