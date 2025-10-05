@@ -53,7 +53,7 @@ jobs:
         shell: pwsh
         run: |
           git add tests/srcTestRepo/outputs/docs/
-          git status
+          git commit -m "Update documentation"
 
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
@@ -62,11 +62,3 @@ jobs:
           RUN_LOCAL: true
           DEFAULT_BRANCH: main
           VALIDATE_MARKDOWN: true
-          CREATE_LOG_FILE: true
-
-      - name: Upload super-linter logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: super-linter.log
-          path: super-linter.log
