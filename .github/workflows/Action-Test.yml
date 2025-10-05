@@ -59,5 +59,13 @@ jobs:
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          RUN_LOCAL: true
           VALIDATE_MARKDOWN: true
-          LOG_LEVEL: DEBUG
+          CREATE_LOG_FILE: true
+
+      - name: Upload super-linter logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: super-linter.log
+          path: super-linter.log
