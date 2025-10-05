@@ -47,6 +47,7 @@
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
+    Import-Module -Name $ModuleName -Force -Verbose
     $moduleInfo = Get-Module $ModuleName
     Write-Host $moduleInfo
     $null = New-MarkdownCommandHelp -ModuleInfo $moduleInfo -OutputFolder $DocsOutputFolder -Force -Verbose
