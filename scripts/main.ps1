@@ -7,7 +7,7 @@ param()
 
 $PSStyle.OutputRendering = 'Ansi'
 
-'platyPS' | ForEach-Object {
+'Microsoft.PowerShell.PlatyPS' | ForEach-Object {
     $name = $_
     Write-Output "Installing module: $name"
     $retryCount = 5
