@@ -50,10 +50,11 @@ jobs:
           Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
 
       - name: Get changes
-        shell: pwsh
-        run: |
-          git add tests/srcTestRepo/outputs/docs/
-          git commit -m "Update documentation"
+        uses: PSModule/GitHub-Script@v1
+        with:
+          Script: |
+            git add tests/srcTestRepo/outputs/docs/
+            git commit -m "Update documentation"
 
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
