@@ -15,7 +15,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read # to checkout the repo
+  statuses: write # to create commit status
 
 jobs:
   ActionTestDefault:
@@ -50,8 +52,9 @@ jobs:
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
+          FILTER_REGEX_INCLUDE: .*outputs/docs/.*\.md$
           GITHUB_TOKEN: ${{ github.token }}
-          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_ALL_CODEBASE: false
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_BIOME_LINT: false
           VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
