@@ -52,8 +52,7 @@
     # Get all exported commands from the module
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
 
-    Write-Host "::group::Found $($commands.Count) commands to process"
-
+    Write-Host "::group::Build docs - Generating markdown help files for $($commands.Count) commands in [$docsOutputFolder]"
     foreach ($command in $commands) {
         try {
             Write-Host "$($command.Name)" -NoNewline
@@ -155,8 +154,8 @@
 
     Write-Host '────────────────────────────────────────────────────────────────────────────────'
     Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $fileName = $_.Name
-        Write-Host "::group:: - [$fileName]"
+        $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $_.FullName)
+        Write-Host "::group:: - [$relPath]"
         Show-FileContent -Path $_
     }
 }
