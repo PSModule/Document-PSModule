@@ -58,12 +58,12 @@
         try {
             Write-Host "$($command.Name)" -NoNewline
             $params = @{
-                CommandInfo     = $command
-                OutputFolder    = $docsOutputFolder
-                Encoding        = 'utf8'
-                ProgressAction  = 'SilentlyContinue'
-                ErrorAction     = 'Stop'
-                Force           = $true
+                CommandInfo    = $command
+                OutputFolder   = $docsOutputFolder
+                Encoding       = 'utf8'
+                ProgressAction = 'SilentlyContinue'
+                ErrorAction    = 'Stop'
+                Force          = $true
             }
             $null = New-MarkdownCommandHelp @params
             Write-Host ' - ✓' -ForegroundColor Green
@@ -127,6 +127,14 @@
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
+    }
+
+    Write-Host '::group::Build docs - Fix frontmatter title'
+    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName -Raw
+        # Replace 'title:' with 'ms.title:' in frontmatter only (between --- markers)
+        $content = $content -replace '(?s)^(---.*?)title:(.*?---)', '$1ms.title:$2'
+        $content | Set-Content -Path $_.FullName
     }
 
     Write-Host '::group::Build docs - Move markdown files from source files to docs'
