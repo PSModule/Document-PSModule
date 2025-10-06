@@ -48,7 +48,7 @@
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
     Write-Host ($ModuleName | Get-Module)
-    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Encoding UTF8
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
