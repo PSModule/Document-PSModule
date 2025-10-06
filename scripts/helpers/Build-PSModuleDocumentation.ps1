@@ -153,7 +153,7 @@
     }
 
     Write-Host '────────────────────────────────────────────────────────────────────────────────'
-    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | Sort-Object FullName | ForEach-Object {
         $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $_.FullName)
         Write-Host "::group:: - [$relPath]"
         Show-FileContent -Path $_
