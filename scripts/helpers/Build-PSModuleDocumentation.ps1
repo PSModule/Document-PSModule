@@ -47,14 +47,31 @@
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
-    Import-Module -Name $ModuleName -Force -Verbose
-    $moduleInfo = Get-Module $ModuleName
-    Write-Host $moduleInfo
-    $DebugPreference = 'Continue'
-    $VerbosePreference = 'Continue'
-    New-MarkdownCommandHelp -ModuleInfo $moduleInfo -OutputFolder $DocsOutputFolder -Force -Verbose -Debug
-    $DebugPreference = 'SilentlyContinue'
-    $VerbosePreference = 'SilentlyContinue'
+    $moduleInfo = Import-Module -Name $ModuleName -Force -PassThru
+
+    # Get all exported commands from the module
+    $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
+
+    Write-Host "Found $($commands.Count) commands to process"
+
+    foreach ($command in $commands) {
+        try {
+            Write-Host "$($command.Name)" -NoNewline
+            $params = @{
+                CommandInfo     = $command
+                OutputFolder    = $DocsOutputFolder
+                Encoding        = 'utf8'
+                ProgressAction  = 'SilentlyContinue'
+                ErrorAction     = 'Stop'
+                Force           = $true
+            }
+            $null = New-MarkdownCommandHelp @params
+            Write-Host ' - ✓' -ForegroundColor Green
+        } catch {
+            Write-Host ' - ✗' -ForegroundColor Red
+        }
+    }
+
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
