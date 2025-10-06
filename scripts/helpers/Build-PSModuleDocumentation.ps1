@@ -47,7 +47,7 @@
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
-    $moduleInfo = Import-Module -Name $ModuleName -PassThru -Verbose:$false
+    $moduleInfo = Import-Module -Name $ModuleName -PassThru -Verbose:$false -Force
 
     # Get all exported commands from the module
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
@@ -138,7 +138,7 @@
         $content | Set-Content -Path $_.FullName
     }
 
-    Write-Host '::group::Build docs - Move markdown files from source files to docs'
+    Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
