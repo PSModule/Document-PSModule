@@ -151,7 +151,8 @@
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
-
+    Write-Host "::endgroup::"
+    
     Write-Host '────────────────────────────────────────────────────────────────────────────────'
     Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | Sort-Object FullName | ForEach-Object {
         $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $_.FullName)
