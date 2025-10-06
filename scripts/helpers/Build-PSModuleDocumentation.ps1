@@ -66,12 +66,16 @@
                 Force          = $true
             }
             $null = New-MarkdownCommandHelp @params
-            Write-Host ' - ✓' -ForegroundColor Green
+            Write-Host " - $($PSStyle.Foreground.Green)✓$($PSStyle.Reset)"
         } catch {
-            Write-Host ' - ✗' -ForegroundColor Red
+            Write-Host " - $($PSStyle.Foreground.Red)✗$($PSStyle.Reset)"
             $_
         }
     }
+
+    Write-Host '::group::Build docs - Generated files'
+    Get-ChildItem -Path $docsOutputFolder -Recurse | Select-Object -ExpandProperty FullName
+    Write-Host '::endgroup::'
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
