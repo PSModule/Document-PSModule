@@ -256,6 +256,9 @@ function Get-PSModuleTest {
         .SYNOPSIS
         Performs tests on a module.
 
+        .DESCRIPTION
+        Performs tests on a module.
+
         .EXAMPLE
         Test-PSModule -Name 'World'
 
@@ -280,6 +283,9 @@ Write-Verbose "[$scriptName] - [/public/New-PSModuleTest.ps1] - Importing"
 function New-PSModuleTest {
     <#
         .SYNOPSIS
+        Performs tests on a module.
+
+        .DESCRIPTION
         Performs tests on a module.
 
         .EXAMPLE
@@ -308,6 +314,9 @@ Write-Verbose "[$scriptName] - [/public/Set-PSModuleTest.ps1] - Importing"
 function Set-PSModuleTest {
     <#
         .SYNOPSIS
+        Performs tests on a module.
+
+        .DESCRIPTION
         Performs tests on a module.
 
         .EXAMPLE
@@ -342,6 +351,9 @@ Write-Verbose "[$scriptName] - [/public/Test-PSModuleTest.ps1] - Importing"
 function Test-PSModuleTest {
     <#
         .SYNOPSIS
+        Performs tests on a module.
+
+        .DESCRIPTION
         Performs tests on a module.
 
         .EXAMPLE
