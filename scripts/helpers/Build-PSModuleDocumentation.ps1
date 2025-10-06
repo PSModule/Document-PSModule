@@ -73,6 +73,8 @@
         }
     }
 
+    $docsOutputFolder = Join-Path $docsOutputFolder $ModuleName | Get-Item
+
     Write-Host '::group::Build docs - Generated files'
     Get-ChildItem -Path $docsOutputFolder -Recurse | Select-Object -ExpandProperty FullName
     Write-Host '::endgroup::'
