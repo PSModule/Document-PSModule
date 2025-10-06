@@ -73,20 +73,18 @@
         }
     }
 
-    $moduleDocsFolder = Join-Path $docsOutputFolder $ModuleName | Get-Item
-
     Write-Host '::group::Build docs - Generated files'
-    Get-ChildItem -Path $moduleDocsFolder -Recurse | Select-Object -ExpandProperty FullName
+    Get-ChildItem -Path $docsOutputFolder -Recurse | Select-Object -ExpandProperty FullName
     Write-Host '::endgroup::'
 
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
         Show-FileContent -Path $_
     }
 
     Write-Host '::group::Build docs - Fix markdown code blocks'
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName
         $fixedOpening = $false
         $newContent = @()
@@ -105,7 +103,7 @@
     }
 
     Write-Host '::group::Build docs - Fix markdown escape characters'
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName -Raw
         $content = $content -replace '\\`', '`'
         $content = $content -replace '\\\[', '['
@@ -118,16 +116,16 @@
 
     Write-Host '::group::Build docs - Structure markdown files to match source files'
     $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
-        $relPath = [System.IO.Path]::GetRelativePath($moduleDocsFolder, $file.FullName)
+        $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $file.FullName)
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
 
         # find the source code file that matches the markdown file
         $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
         Write-Host "   PS1 path: $scriptPath"
-        $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $moduleDocsFolder).Replace('.ps1', '.md')
+        $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $docsOutputFolder).Replace('.ps1', '.md')
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
@@ -135,7 +133,7 @@
     }
 
     Write-Host '::group::Build docs - Fix frontmatter title'
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName -Raw
         # Replace 'title:' with 'ms.title:' in frontmatter only (between --- markers)
         $content = $content -replace '(?s)^(---.*?)title:(.*?---)', '$1ms.title:$2'
@@ -149,7 +147,7 @@
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
 
-        $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $moduleDocsFolder)
+        $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $docsOutputFolder)
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
@@ -157,7 +155,7 @@
     }
 
     Write-Host '────────────────────────────────────────────────────────────────────────────────'
-    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
         Show-FileContent -Path $_
