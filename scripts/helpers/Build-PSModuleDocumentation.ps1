@@ -139,7 +139,7 @@
         $content | Set-Content -Path $_.FullName
     }
 
-    Write-Host '::group::Build docs - Move markdown files from source files to docs'
+    Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
