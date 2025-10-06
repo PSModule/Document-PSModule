@@ -52,7 +52,7 @@
     # Get all exported commands from the module
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
 
-    Write-Host "Found $($commands.Count) commands to process"
+    Write-Host "::group::Found $($commands.Count) commands to process"
 
     foreach ($command in $commands) {
         try {
@@ -75,7 +75,6 @@
 
     Write-Host '::group::Build docs - Generated files'
     Get-ChildItem -Path $docsOutputFolder -Recurse | Select-Object -ExpandProperty FullName
-    Write-Host '::endgroup::'
 
     Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
