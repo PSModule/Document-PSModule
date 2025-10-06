@@ -75,9 +75,9 @@
     Write-Host '::group::Build docs - Generated files'
     Get-ChildItem -Path $docsOutputFolder -Recurse | Select-Object -ExpandProperty FullName
 
-    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $fileName = $_.Name
-        Write-Host "::group:: - [$fileName]"
+    Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | Sort-Object FullName | ForEach-Object {
+        $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $_.FullName)
+        Write-Host "::group:: - [$relPath]"
         Show-FileContent -Path $_
     }
 
@@ -151,8 +151,8 @@
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
-    Write-Host "::endgroup::"
-    
+    Write-Host '::endgroup::'
+
     Write-Host '────────────────────────────────────────────────────────────────────────────────'
     Get-ChildItem -Path $docsOutputFolder -Recurse -Force -Include '*.md' | Sort-Object FullName | ForEach-Object {
         $relPath = [System.IO.Path]::GetRelativePath($docsOutputFolder, $_.FullName)
