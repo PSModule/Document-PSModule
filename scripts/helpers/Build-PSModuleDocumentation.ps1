@@ -47,7 +47,7 @@
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
-    $moduleInfo = Get-Module -Name $ModuleName
+    $moduleInfo = Import-Module -Name $ModuleName -PassThru -Verbose:$false
 
     # Get all exported commands from the module
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
