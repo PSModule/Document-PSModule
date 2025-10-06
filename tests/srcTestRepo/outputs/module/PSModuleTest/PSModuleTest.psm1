@@ -256,6 +256,9 @@ function Get-PSModuleTest {
         .SYNOPSIS
         Performs tests on a module.
 
+        .DESCRIPTION
+        Performs tests on a module.
+
         .EXAMPLE
         Test-PSModule -Name 'World'
 
@@ -280,6 +283,9 @@ Write-Verbose "[$scriptName] - [/public/New-PSModuleTest.ps1] - Importing"
 function New-PSModuleTest {
     <#
         .SYNOPSIS
+        Performs tests on a module.
+
+        .DESCRIPTION
         Performs tests on a module.
 
         .EXAMPLE
@@ -310,10 +316,19 @@ function Set-PSModuleTest {
         .SYNOPSIS
         Performs tests on a module.
 
+        .DESCRIPTION
+        Performs tests on a module.
+
         .EXAMPLE
         Test-PSModule -Name 'World'
 
         "Hello, World!"
+
+        .NOTES
+        Controls:
+        - :q      : Quit
+        - :q!     : Quit without saving
+        - :wq     : Save and quit
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
@@ -336,6 +351,9 @@ Write-Verbose "[$scriptName] - [/public/Test-PSModuleTest.ps1] - Importing"
 function Test-PSModuleTest {
     <#
         .SYNOPSIS
+        Performs tests on a module.
+
+        .DESCRIPTION
         Performs tests on a module.
 
         .EXAMPLE

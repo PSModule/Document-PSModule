@@ -47,8 +47,32 @@
 
     Write-Host '::group::Build docs - Generate markdown help - Raw'
     Install-PSModule -Path $ModuleOutputFolder
-    Write-Host ($ModuleName | Get-Module)
-    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    $moduleInfo = Import-Module -Name $ModuleName -Force -PassThru
+
+    # Get all exported commands from the module
+    $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
+
+    Write-Host "Found $($commands.Count) commands to process"
+
+    foreach ($command in $commands) {
+        try {
+            Write-Host "$($command.Name)" -NoNewline
+            $params = @{
+                CommandInfo    = $command
+                OutputFolder   = $docsOutputFolder
+                Encoding       = 'utf8'
+                ProgressAction = 'SilentlyContinue'
+                ErrorAction    = 'Stop'
+                Force          = $true
+            }
+            $null = New-MarkdownCommandHelp @params
+            Write-Host ' - ✓' -ForegroundColor Green
+        } catch {
+            Write-Host ' - ✗' -ForegroundColor Red
+            $_
+        }
+    }
+
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         Write-Host "::group:: - [$fileName]"
@@ -88,30 +112,40 @@
 
     Write-Host '::group::Build docs - Structure markdown files to match source files'
     $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
-    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    $moduleDocsFolder = Join-Path $DocsOutputFolder.FullName $ModuleName
+    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
-        $relPath = [System.IO.Path]::GetRelativePath($DocsOutputFolder.FullName, $file.FullName)
+        $relPath = [System.IO.Path]::GetRelativePath($moduleDocsFolder, $file.FullName)
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
 
         # find the source code file that matches the markdown file
         $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
         Write-Host "   PS1 path: $scriptPath"
-        $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
+        $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $moduleDocsFolder).Replace('.ps1', '.md')
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
         Move-Item -Path $file.FullName -Destination $docsFilePath -Force
     }
 
+    Write-Host '::group::Build docs - Fix frontmatter title'
+    Get-ChildItem -Path $moduleDocsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName -Raw
+        # Replace 'title:' with 'ms.title:' in frontmatter only (between --- markers)
+        $content = $content -replace '(?s)^(---.*?)title:(.*?---)', '$1ms.title:$2'
+        $content | Set-Content -Path $_.FullName
+    }
+
     Write-Host '::group::Build docs - Move markdown files from source files to docs'
+    $moduleDocsFolder = Join-Path $DocsOutputFolder.FullName $ModuleName
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
 
-        $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
+        $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $moduleDocsFolder)
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
