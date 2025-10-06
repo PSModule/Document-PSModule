@@ -7,6 +7,12 @@
         Test-PSModule -Name 'World'
 
         "Hello, World!"
+
+        .NOTES
+        Controls:
+        - :q      : Quit
+        - :q!     : Quit without saving
+        - :wq     : Save and quit
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
