@@ -59,7 +59,7 @@
             Write-Host "$($command.Name)" -NoNewline
             $params = @{
                 CommandInfo     = $command
-                OutputFolder    = $DocsOutputFolder
+                OutputFolder    = $docsOutputFolder
                 Encoding        = 'utf8'
                 ProgressAction  = 'SilentlyContinue'
                 ErrorAction     = 'Stop'
@@ -69,6 +69,7 @@
             Write-Host ' - ✓' -ForegroundColor Green
         } catch {
             Write-Host ' - ✗' -ForegroundColor Red
+            $_
         }
     }
 
