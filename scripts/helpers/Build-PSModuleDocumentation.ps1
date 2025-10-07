@@ -26,7 +26,11 @@
 
         # Path to the folder where the documentation is outputted.
         [Parameter(Mandatory)]
-        [string] $DocsOutputFolderPath
+        [string] $DocsOutputFolderPath,
+
+        # Show GitHub Step Summary even when all commands succeed.
+        [Parameter()]
+        [bool] $ShowSummaryOnSuccess = $false
     )
 
     Write-Host "::group::Documenting module [$ModuleName]"
@@ -53,6 +57,7 @@
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
 
     Write-Host "::group::Build docs - Generating markdown help files for $($commands.Count) commands in [$docsOutputFolder]"
+    $commandResults = [System.Collections.Generic.List[PSObject]]::new()
     foreach ($command in $commands) {
         try {
             Write-Host "$($command.Name)" -NoNewline
@@ -66,10 +71,64 @@
             }
             $null = New-MarkdownCommandHelp @params
             Write-Host " - $($PSStyle.Foreground.Green)✓$($PSStyle.Reset)"
+            $commandResults.Add([PSCustomObject]@{
+                    CommandName = $command.Name
+                    Status      = 'Success'
+                    Error       = $null
+                    ErrorString = $null
+                })
         } catch {
             Write-Host " - $($PSStyle.Foreground.Red)✗$($PSStyle.Reset)"
-            $_
+            $commandResults.Add([PSCustomObject]@{
+                    CommandName = $command.Name
+                    Status      = 'Failed'
+                    Error       = $_
+                    ErrorString = $_.ToString()
+                })
+            Write-Error $_
         }
+    }
+    Write-Host '::endgroup::'
+
+    $failedCommands = $commandResults | Where-Object { $_.Status -eq 'Failed' }
+    $successfulCommands = $commandResults | Where-Object { $_.Status -eq 'Success' }
+    $hasFailures = $failedCommands.Count -gt 0
+    $shouldShowSummary = $hasFailures -or $ShowSummaryOnSuccess
+
+    # Generate summary if there are failures OR if ShowSummaryOnSuccess is enabled
+    if ($shouldShowSummary) {
+        $statusIcon = $hasFailures ? '❌' : '✅'
+        $statusText = $hasFailures ? 'Failed' : 'Succeeded'
+        Write-Host "::group::Build docs - Documentation generation summary $statusIcon"
+
+        $successCount = $successfulCommands.Count
+        $failureCount = $failedCommands.Count
+
+        $summaryContent = @"
+# $statusIcon Documentation Build $($statusText.ToLower())
+
+| Success | Failure |
+|---------|---------|
+| $successCount | $failureCount |
+
+## Command status
+
+| Command | Status |
+|---------|--------|
+$(($commandResults | ForEach-Object { "| ``$($_.CommandName)`` | $($_.Status) |`n" }) -join '')
+
+"@
+
+
+        $summaryContent | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+        Write-Host "$summaryContent"
+        Write-Host '::endgroup::'
+    }
+
+    # Fail the task if there were any failures (independent of summary display)
+    if ($hasFailures) {
+        Write-Error "Documentation generation failed for $($failedCommands.Count) command(s). See above for details."
+        exit 1
     }
 
     Write-Host '::group::Build docs - Generated files'

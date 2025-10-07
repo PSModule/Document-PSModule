@@ -24,9 +24,9 @@ Write-Verbose "[$scriptName] - [/init] - Processing folder"
 #region - From /init/initializer.ps1
 Write-Verbose "[$scriptName] - [/init/initializer.ps1] - Importing"
 
-Write-Verbose '-------------------------------' -Verbose
-Write-Verbose '---  THIS IS AN INITIALIZER ---' -Verbose
-Write-Verbose '-------------------------------' -Verbose
+Write-Verbose '-------------------------------'
+Write-Verbose '---  THIS IS AN INITIALIZER ---'
+Write-Verbose '-------------------------------'
 
 Write-Verbose "[$scriptName] - [/init/initializer.ps1] - Done"
 #endregion - From /init/initializer.ps1
@@ -190,7 +190,7 @@ Write-Verbose "[$scriptName] - [/private] - Processing folder"
 #region - From /private/Get-InternalPSModule.ps1
 Write-Verbose "[$scriptName] - [/private/Get-InternalPSModule.ps1] - Importing"
 
-Function Get-InternalPSModule {
+function Get-InternalPSModule {
     <#
         .SYNOPSIS
         Performs tests on a module.
@@ -214,7 +214,7 @@ Write-Verbose "[$scriptName] - [/private/Get-InternalPSModule.ps1] - Done"
 #region - From /private/Set-InternalPSModule.ps1
 Write-Verbose "[$scriptName] - [/private/Set-InternalPSModule.ps1] - Importing"
 
-Function Set-InternalPSModule {
+function Set-InternalPSModule {
     <#
         .SYNOPSIS
         Performs tests on a module.
@@ -379,9 +379,9 @@ Write-Verbose "[$scriptName] - [/public] - Done"
 #region - From /finally.ps1
 Write-Verbose "[$scriptName] - [/finally.ps1] - Importing"
 
-Write-Verbose '------------------------------' -Verbose
-Write-Verbose '---  THIS IS A LAST LOADER ---' -Verbose
-Write-Verbose '------------------------------' -Verbose
+Write-Verbose '------------------------------'
+Write-Verbose '---  THIS IS A LAST LOADER ---'
+Write-Verbose '------------------------------'
 Write-Verbose "[$scriptName] - [/finally.ps1] - Done"
 #endregion - From /finally.ps1
 

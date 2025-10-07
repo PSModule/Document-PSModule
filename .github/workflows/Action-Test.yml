@@ -43,6 +43,7 @@ jobs:
         with:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
+          ShowSummaryOnSuccess: true
 
       - name: Get changes
         uses: PSModule/GitHub-Script@v1
