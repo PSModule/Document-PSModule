@@ -53,6 +53,7 @@
     $commands = $moduleInfo.ExportedCommands.Values | Where-Object { $_.CommandType -ne 'Alias' }
 
     Write-Host "::group::Build docs - Generating markdown help files for $($commands.Count) commands in [$docsOutputFolder]"
+    $failedCommands = @()
     foreach ($command in $commands) {
         try {
             Write-Host "$($command.Name)" -NoNewline
@@ -68,8 +69,55 @@
             Write-Host " - $($PSStyle.Foreground.Green)✓$($PSStyle.Reset)"
         } catch {
             Write-Host " - $($PSStyle.Foreground.Red)✗$($PSStyle.Reset)"
-            $_
+            $failedCommands += [PSCustomObject]@{
+                CommandName = $command.Name
+                Error       = $_
+                ErrorString = $_.ToString()
+            }
+            Write-Error $_
         }
+    }
+
+    # If there were failures, generate a summary and fail the task
+    if ($failedCommands.Count -gt 0) {
+        Write-Host '::endgroup::'
+        Write-Host '::group::Build docs - Failed commands summary'
+        Write-Host "$($PSStyle.Foreground.Red)Failed to generate documentation for $($failedCommands.Count) command(s):$($PSStyle.Reset)"
+        foreach ($failed in $failedCommands) {
+            Write-Host "  $($PSStyle.Foreground.Red)✗$($PSStyle.Reset) $($failed.CommandName)"
+            Write-Host "    Error: $($failed.ErrorString)" -ForegroundColor Red
+        }
+
+        $summaryContent = @"
+# :x: Documentation Build Failed
+
+Failed to generate documentation for **$($failedCommands.Count)** command(s) out of **$($commands.Count)** total.
+
+## Failed Commands
+
+| Command | Error |
+|---------|-------|
+"@
+        foreach ($failed in $failedCommands) {
+            # Escape pipe characters in error messages for markdown table
+            $errorMsg = $failed.ErrorString -replace '\|', '\|' -replace "`r`n", '<br>' -replace "`n", '<br>'
+            $summaryContent += "`n| ``$($failed.CommandName)`` | $errorMsg |"
+        }
+
+        $summaryContent += @"
+
+
+## Summary
+
+- :white_check_mark: Successful: **$($commands.Count - $failedCommands.Count)**
+- :x: Failed: **$($failedCommands.Count)**
+
+"@
+        $summaryContent | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+        Write-Host '::endgroup::'
+        Write-Error "Documentation generation failed for $($failedCommands.Count) command(s). See above for details."
+        exit 1
     }
 
     Write-Host '::group::Build docs - Generated files'
