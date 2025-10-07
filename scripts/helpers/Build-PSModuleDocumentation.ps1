@@ -115,7 +115,7 @@
 
 | Command | Status |
 |---------|--------|
-$($commandResults | ForEach-Object { "| ``$($_.CommandName)`` | $($_.Status) |`n" } -join '')
+$(($commandResults | ForEach-Object { "| ``$($_.CommandName)`` | $($_.Status) |`n" }) -join '')
 
 "@
 
