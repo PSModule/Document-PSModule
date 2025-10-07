@@ -25,6 +25,7 @@ Include this action in your workflow to automatically build and structure docume
 |--------------------|-----------------------------------------------|----------|-------------|
 | `Name`             | Name of the module to document.               | No       | <Repo name> |
 | `WorkingDirectory` | Directory from which the script will execute. | No       | `.`         |
+| `ShowSummaryOnSuccess` | Show GitHub Step Summary even when all commands succeed. | No | `false` |
 
 ### Secrets
 
@@ -42,4 +43,5 @@ This action does not have defined outputs.
   with:
     Name: 'MyModule'
     WorkingDirectory: './module-directory'
+    ShowSummaryOnSuccess: true  # Optional: Show summary even on success
 ```

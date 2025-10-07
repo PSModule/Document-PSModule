@@ -13,6 +13,10 @@ inputs:
     description: The working directory where the script will run from.
     required: false
     default: '.'
+  ShowSummaryOnSuccess:
+    description: Show GitHub Step Summary even when all commands succeed.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -24,6 +28,7 @@ runs:
       shell: pwsh
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
+        GITHUB_ACTION_INPUT_ShowSummaryOnSuccess: ${{ inputs.ShowSummaryOnSuccess }}
       working-directory: ${{ inputs.WorkingDirectory }}
       run: |
         # Build-PSModuleDocumentation
