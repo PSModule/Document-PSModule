@@ -85,7 +85,7 @@
                     Error       = $_
                     ErrorString = $_.ToString()
                 })
-            Write-Error $_
+            Write-Warning "Failed to generate markdown help for $($command.Name): $_"
         }
     }
     Write-Host '::endgroup::'
