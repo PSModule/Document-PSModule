@@ -119,7 +119,9 @@ $(($commandResults | ForEach-Object { "| ``$($_.CommandName)`` | $($_.Status) |`
 
 "@
 
+
         $summaryContent | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+        Write-Host "$summaryContent"
         Write-Host '::endgroup::'
     }
 
