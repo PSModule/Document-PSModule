@@ -46,20 +46,20 @@ jobs:
           WorkingDirectory: tests/srcTestRepo
           ShowSummaryOnSuccess: true
 
-      # - name: Get changes
-      #   uses: PSModule/GitHub-Script@v1
-      #   with:
-      #     Script: |
-      #       LogGroup 'List files' {
-      #         Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
-      #       }
-      #       LogGroup 'Commit changes for linting' {
-      #         git add .
-      #         git commit -m 'Stage changes for linting'
-      #       }
-      #       LogGroup 'Get changes' {
-      #         git status
-      #       }
+      - name: Get changes
+        uses: PSModule/GitHub-Script@v1
+        with:
+          Script: |
+            LogGroup 'List files' {
+              Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
+            }
+            LogGroup 'Commit changes for linting' {
+              git add .
+              git commit -m 'Stage changes for linting'
+            }
+            LogGroup 'Get changes' {
+              git status
+            }
 
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
