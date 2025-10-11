@@ -75,3 +75,4 @@ jobs:
           DEFAULT_BRANCH: ${{ fromJson(steps.get-lint-branch.outputs.result).lintBranch }}
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
+          VALIDATE_ALL_CODEBASE: true
