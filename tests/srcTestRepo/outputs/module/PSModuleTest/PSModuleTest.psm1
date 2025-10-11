@@ -257,7 +257,7 @@ function Get-PSModuleTest {
         Performs tests on a module.
 
         .DESCRIPTION
-        Performs tests on a module.
+        Performs tests on a module. api
 
         .EXAMPLE
         Test-PSModule -Name 'World'
