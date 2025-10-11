@@ -64,4 +64,3 @@ jobs:
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-          FILTER_REGEX_INCLUDE: .*tests/srcTestRepo/outputs/docs/.*
