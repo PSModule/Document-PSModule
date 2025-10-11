@@ -54,12 +54,11 @@ jobs:
               Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
             }
             LogGroup 'Create lint branch' {
-              git branch -D lint -f 2>$null
               git checkout -b lint
             }
             LogGroup 'Commit changes for linting' {
               git add .
-              git commit -m 'Stage changes for linting'
+              # git commit -m 'Stage changes for linting'
             }
             LogGroup 'Get changes' {
               git status
