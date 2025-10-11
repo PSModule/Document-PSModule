@@ -5,9 +5,6 @@ run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.eve
 on:
   workflow_dispatch:
   pull_request:
-  push:
-    branches:
-      - main
   schedule:
     - cron: '0 0 * * *'
 
@@ -48,11 +45,24 @@ jobs:
           WorkingDirectory: tests/srcTestRepo
           ShowSummaryOnSuccess: true
 
+      - name: Get changes
+        uses: PSModule/GitHub-Script@v1
+        with:
+          Script: |
+            LogGroup "List files" {
+              Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
+            }
+            LogGroup "Commit changes" {
+              git add tests/srcTestRepo/outputs/docs/
+              git status
+            }
+
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DEFAULT_BRANCH: main
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          FILTER_REGEX_INCLUDE: ^tests/srcTestRepo/outputs/docs/.*
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
