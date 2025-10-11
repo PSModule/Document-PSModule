@@ -63,4 +63,3 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           VALIDATE_MARKDOWN: true
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-          FILTER_REGEX_INCLUDE: .*/srcTestRepo/outputs/.*
