@@ -48,13 +48,17 @@ jobs:
 
       - name: Get changes
         uses: PSModule/GitHub-Script@v1
+        id: get-lint-branch
         with:
           Script: |
             LogGroup 'List files' {
               Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
             }
-            LogGroup 'Create lint branch' {
-              git checkout -b lint
+            $random = Get-Random -Minimum 1000 -Maximum 9999
+            $branch = "lint-$random"
+            Set-GitHubOutput -Name lintBranch -Value $branch
+            LogGroup "Create $branch branch" {
+              git checkout -b $branch
             }
             LogGroup 'Commit changes for linting' {
               git add .
@@ -68,6 +72,6 @@ jobs:
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DEFAULT_BRANCH: lint
+          DEFAULT_BRANCH: ${{ fromJson(steps.get-lint-branch.outputs.result).lintBranch }}
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
