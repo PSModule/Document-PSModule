@@ -46,33 +46,33 @@ jobs:
           WorkingDirectory: tests/srcTestRepo
           ShowSummaryOnSuccess: true
 
-      - name: Get changes
-        uses: PSModule/GitHub-Script@v1
-        id: get-lint-branch
-        with:
-          Script: |
-            LogGroup 'List files' {
-              Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
-            }
-            $random = Get-Random -Minimum 1000 -Maximum 9999
-            $branch = "lint-$random"
-            Set-GitHubOutput -Name lintBranch -Value $branch
-            LogGroup "Create $branch branch" {
-              git checkout -b $branch
-            }
-            LogGroup 'Commit changes for linting' {
-              git add .
-              git commit -m 'Stage changes for linting'
-            }
-            LogGroup 'Get changes' {
-              git status
-            }
+      # - name: Get changes
+      #   uses: PSModule/GitHub-Script@v1
+      #   id: get-lint-branch
+      #   with:
+      #     Script: |
+      #       LogGroup 'List files' {
+      #         Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
+      #       }
+      #       $random = Get-Random -Minimum 1000 -Maximum 9999
+      #       $branch = "lint-$random"
+      #       Set-GitHubOutput -Name lintBranch -Value $branch
+      #       LogGroup "Create $branch branch" {
+      #         git checkout -b $branch
+      #       }
+      #       LogGroup 'Commit changes for linting' {
+      #         git add .
+      #         git commit -m 'Stage changes for linting'
+      #       }
+      #       LogGroup 'Get changes' {
+      #         git status
+      #       }
 
       - name: Lint documentation
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DEFAULT_BRANCH: ${{ fromJson(steps.get-lint-branch.outputs.result).lintBranch }}
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
           VALIDATE_ALL_CODEBASE: true
+          USE_FIND_ALGORITHM: true
