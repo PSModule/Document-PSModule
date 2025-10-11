@@ -3,6 +3,9 @@ name: Action-Test
 run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}"
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   pull_request:
   schedule:
@@ -45,20 +48,11 @@ jobs:
           WorkingDirectory: tests/srcTestRepo
           ShowSummaryOnSuccess: true
 
-      - name: Get changes
-        uses: PSModule/GitHub-Script@v1
-        with:
-          Script: |
-            LogGroup "List files" {
-              Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
-            }
-            LogGroup "Commit changes" {
-              git add tests/srcTestRepo/outputs/docs/
-              git commit -m "Update documentation"
-            }
-
       - name: Lint documentation
-        uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
+        uses: super-linter/super-linter/slim@v8.1.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
           VALIDATE_MARKDOWN: true
+          VALIDATE_NATURAL_LANGUAGE: true
+          VALIDATE_ALL_CODEBASE: true
+          USE_FIND_ALGORITHM: true
