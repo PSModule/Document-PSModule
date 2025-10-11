@@ -58,7 +58,7 @@ jobs:
             }
             LogGroup 'Commit changes for linting' {
               git add .
-              # git commit -m 'Stage changes for linting'
+              git commit -m 'Stage changes for linting'
             }
             LogGroup 'Get changes' {
               git status
@@ -69,7 +69,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEFAULT_BRANCH: lint
-          VALIDATE_ALL_CODEBASE: true
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
-          FILTER_REGEX_INCLUDE: ^tests/srcTestRepo/outputs/docs/.*
