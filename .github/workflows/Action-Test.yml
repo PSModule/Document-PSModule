@@ -49,11 +49,14 @@ jobs:
         uses: PSModule/GitHub-Script@v1
         with:
           Script: |
-            LogGroup "List files" {
+            LogGroup 'List files' {
               Get-ChildItem -Recurse -File | Select-Object -ExpandProperty FullName | Sort-Object
             }
-            LogGroup "Commit changes" {
+            LogGroup 'Commit changes' {
               git add tests/srcTestRepo/outputs/docs/
+              git commit -m 'chore: update docs'
+            }
+            LogGroup 'Get changes' {
               git status
             }
 
@@ -62,7 +65,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          FILTER_REGEX_INCLUDE: ^tests/srcTestRepo/outputs/docs/.*
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
