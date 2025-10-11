@@ -65,9 +65,7 @@ jobs:
         uses: super-linter/super-linter/slim@7bba2eeb89d01dc9bfd93c497477a57e72c83240 # v8.2.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          RUN_LOCAL: true
-          ENABLE_GITHUB_ACTIONS_GROUP_TITLE: true
-          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
+          DEFAULT_BRANCH: ${{ github.ref }}
           VALIDATE_ALL_CODEBASE: true
           VALIDATE_MARKDOWN: true
           VALIDATE_NATURAL_LANGUAGE: true
