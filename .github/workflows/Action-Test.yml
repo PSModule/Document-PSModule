@@ -53,7 +53,7 @@ jobs:
           $summary = Get-Content $env:GITHUB_STEP_SUMMARY -Raw
           Write-Host "Step summary:"
           Write-Host "[$summary]"
-          if ([string]::IsNullOrEmpty($summary)) {
+          if (-not [string]::IsNullOrEmpty($summary)) {
             throw "Step summary is not empty: $summary"
           }
           Write-Host "Step summary is empty as expected."
