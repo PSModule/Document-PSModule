@@ -93,7 +93,7 @@
     $failedCommands = $commandResults | Where-Object { $_.Status -eq 'Failed' }
     $successfulCommands = $commandResults | Where-Object { $_.Status -eq 'Success' }
     $hasFailures = $failedCommands.Count -gt 0
-    $shouldShowSummary = $ShowSummaryOnSuccess
+    $shouldShowSummary = $hasFailures -or $ShowSummaryOnSuccess
 
     # Generate summary if ShowSummaryOnSuccess is enabled
     if ($shouldShowSummary) {
