@@ -11,13 +11,12 @@ param(
 $PSStyle.OutputRendering = 'Ansi'
 
 'Microsoft.PowerShell.PlatyPS' | ForEach-Object {
-    $name = $_
-    Write-Output "Installing module: $name"
+    Write-Output "Installing module: $_"
     $retryCount = 5
     $retryDelay = 10
     for ($i = 0; $i -lt $retryCount; $i++) {
         try {
-            Install-PSResource -Name $name -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+            Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
             break
         } catch {
             Write-Warning "Installation of $($psResourceParams.Name) failed with error: $_"
@@ -28,7 +27,7 @@ $PSStyle.OutputRendering = 'Ansi'
             Start-Sleep -Seconds $retryDelay
         }
     }
-    Import-Module -Name $name
+    Import-Module -Name $_
 }
 
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
