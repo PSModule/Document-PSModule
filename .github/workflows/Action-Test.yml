@@ -23,8 +23,8 @@ permissions:
   statuses: write # to create commit status
 
 jobs:
-  ActionTestDefault:
-    name: Action-Test - [Default]
+  UploadArtifact:
+    name: Upload Artifact
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -40,6 +40,17 @@ jobs:
           path: tests/srcTestRepo/outputs/module
           if-no-files-found: error
           retention-days: 1
+
+  ActionTestDefault:
+    name: Action-Test - [Default]
+    runs-on: ubuntu-latest
+    needs: UploadArtifact
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
 
       - name: Action-Test
         uses: ./
@@ -70,6 +81,7 @@ jobs:
   ActionTestWithSummary:
     name: Action-Test - [With Summary]
     runs-on: ubuntu-latest
+    needs: UploadArtifact
     steps:
       - name: Checkout repo
         uses: actions/checkout@v5
@@ -77,13 +89,6 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Upload module artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: module
-          path: tests/srcTestRepo/outputs/module
-          if-no-files-found: error
-          retention-days: 1
 
       - name: Action-Test
         uses: ./
