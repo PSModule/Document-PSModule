@@ -66,3 +66,39 @@ jobs:
           VALIDATE_NATURAL_LANGUAGE: true
           VALIDATE_ALL_CODEBASE: true
           USE_FIND_ALGORITHM: true
+
+  ActionTestWithSummary:
+    name: Action-Test - [With Summary]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Upload module artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module
+          path: tests/srcTestRepo/outputs/module
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Action-Test
+        uses: ./
+        with:
+          Name: PSModuleTest
+          WorkingDirectory: tests/srcTestRepo
+          ShowSummaryOnSuccess: true
+
+      - name: Check step summary is not empty
+        shell: pwsh
+        run: |
+          $summary = Get-Content $env:GITHUB_STEP_SUMMARY -Raw
+          Write-Host "Step summary:"
+          Write-Host "[$summary]"
+          if ([string]::IsNullOrEmpty($summary)) {
+            throw "Step summary is empty, but expected not to be."
+          }
+          Write-Host "Step summary is not empty as expected."
