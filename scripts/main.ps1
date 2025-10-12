@@ -3,7 +3,10 @@
     Justification = 'Want to just write to the console, not the pipeline.'
 )]
 [CmdletBinding()]
-param()
+param(
+    [string]$Name = $env:DOCUMENT_PSMODULE_INPUT_Name,
+    [bool]$ShowSummaryOnSuccess = $env:DOCUMENT_PSMODULE_INPUT_ShowSummaryOnSuccess -eq 'true'
+)
 
 $PSStyle.OutputRendering = 'Ansi'
 
@@ -37,18 +40,16 @@ Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | Fo
 
 Write-Host '::group::Loading inputs'
 $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
-$moduleName = [string]::IsNullOrEmpty($env:GITHUB_ACTION_INPUT_Name) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
-$showSummaryOnSuccess = $env:GITHUB_ACTION_INPUT_ShowSummaryOnSuccess -eq 'true'
 $moduleSourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
 $modulesOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/module'
 $docsOutputFolderPath = Join-Path -Path . -ChildPath 'outputs/docs'
 
 $params = @{
-    ModuleName              = $moduleName
+    ModuleName              = [string]::IsNullOrEmpty($Name) ? $env:GITHUB_REPOSITORY_NAME : $Name
     ModuleSourceFolderPath  = $moduleSourceFolderPath
     ModulesOutputFolderPath = $modulesOutputFolderPath
     DocsOutputFolderPath    = $docsOutputFolderPath
-    ShowSummaryOnSuccess    = $showSummaryOnSuccess
+    ShowSummaryOnSuccess    = $ShowSummaryOnSuccess
 }
 
 [pscustomobject]$params | Format-List | Out-String

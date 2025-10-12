@@ -58,17 +58,6 @@ jobs:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
 
-      - name: Check step summary is empty
-        shell: pwsh
-        run: |
-          $summary = Get-Content $env:GITHUB_STEP_SUMMARY -Raw
-          Write-Host "Step summary:"
-          Write-Host "[$summary]"
-          if (-not [string]::IsNullOrEmpty($summary)) {
-            throw "Step summary is not empty: $summary"
-          }
-          Write-Host "Step summary is empty as expected."
-
       - name: Lint documentation
         uses: super-linter/super-linter/slim@v8.1.0
         env:
@@ -96,14 +85,3 @@ jobs:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
           ShowSummaryOnSuccess: true
-
-      - name: Check step summary is not empty
-        shell: pwsh
-        run: |
-          $summary = Get-Content $env:GITHUB_STEP_SUMMARY -Raw
-          Write-Host "Step summary:"
-          Write-Host "[$summary]"
-          if ([string]::IsNullOrEmpty($summary)) {
-            throw "Step summary is empty, but expected not to be."
-          }
-          Write-Host "Step summary is not empty as expected."

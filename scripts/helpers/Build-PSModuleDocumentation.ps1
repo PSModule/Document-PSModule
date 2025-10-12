@@ -1,10 +1,10 @@
 ﻿function Build-PSModuleDocumentation {
     <#
-    .SYNOPSIS
-    Builds a module.
+        .SYNOPSIS
+        Builds a module.
 
-    .DESCRIPTION
-    Builds a module.
+        .DESCRIPTION
+        Builds a module.
     #>
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
@@ -93,9 +93,9 @@
     $failedCommands = $commandResults | Where-Object { $_.Status -eq 'Failed' }
     $successfulCommands = $commandResults | Where-Object { $_.Status -eq 'Success' }
     $hasFailures = $failedCommands.Count -gt 0
-    $shouldShowSummary = $hasFailures -or $ShowSummaryOnSuccess
+    $shouldShowSummary = $ShowSummaryOnSuccess
 
-    # Generate summary if there are failures OR if ShowSummaryOnSuccess is enabled
+    # Generate summary if ShowSummaryOnSuccess is enabled
     if ($shouldShowSummary) {
         $statusIcon = $hasFailures ? '❌' : '✅'
         $statusText = $hasFailures ? 'Failed' : 'Succeeded'
@@ -111,13 +111,39 @@
 |---------|---------|
 | $successCount | $failureCount |
 
-## Command status
+"@
 
-| Command | Status |
-|---------|--------|
-$(($commandResults | ForEach-Object { "| ``$($_.CommandName)`` | $($_.Status) |`n" }) -join '')
+        if ($failedCommands) {
+            $summaryContent += @"
+
+<details><summary>Failed</summary>
+
+<p>
+
+$(($failedCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join '')
+
+</p>
+
+</details>
 
 "@
+        }
+
+        if ($successfulCommands) {
+            $summaryContent += @"
+
+<details><summary>Succeeded</summary>
+
+<p>
+
+$(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join '')
+
+</p>
+
+</details>
+
+"@
+        }
 
 
         $summaryContent | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
