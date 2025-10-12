@@ -51,7 +51,7 @@ jobs:
         shell: pwsh
         run: |
           $summary = Get-Content $env:GITHUB_STEP_SUMMARY -Raw
-          if ($summary.Trim() -ne '') {
+          if ([string]::IsNullOrEmpty($summary)) {
             throw "Step summary is not empty: $summary"
           }
           Write-Host "Step summary is empty as expected."
