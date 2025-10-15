@@ -1,9 +1,6 @@
-name: Document-PSModule (by PSModule)
+name: Document-PSModule
 description: Build documentation for a PowerShell module.
 author: PSModule
-branding:
-  icon: package
-  color: gray-dark
 
 inputs:
   Name:
