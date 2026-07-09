@@ -224,6 +224,12 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
     }
 
     Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
+    # Folders that already provide an explicit index.md; a sibling <Group>.md in such a folder
+    # stays a normal page so it never overwrites the author-provided index.md.
+    $explicitIndexFolders = @(
+        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Filter 'index.md' |
+            ForEach-Object { $_.Directory.FullName }
+    )
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
@@ -232,11 +238,14 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $docsOutputFolder)
 
-        # A group overview page named after its folder (e.g. Auth/Auth.md) is published as the
-        # section landing page (Auth/index.md) so the navigation shows it when the group is
-        # selected, instead of listing it as a separate page nested under the group.
-        $parentFolderName = Split-Path -Path (Split-Path -Path $file.FullName -Parent) -Leaf
-        if ($file.BaseName -eq $parentFolderName) {
+        # A group's overview page becomes the section landing page (index.md) so the navigation
+        # shows it when the group is selected, instead of a page nested under the group. Authors
+        # can either name it after the folder (e.g. Auth/Auth.md) or provide Auth/index.md directly.
+        $parentFolder = Split-Path -Path $file.FullName -Parent
+        $parentFolderName = Split-Path -Path $parentFolder -Leaf
+        if ($file.Name -eq 'index.md') {
+            Write-Host '   Section index page (index.md) - publishing as-is'
+        } elseif ($file.BaseName -eq $parentFolderName -and $parentFolder -notin $explicitIndexFolders) {
             $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
             Write-Host '   Group overview page detected - publishing as section index (index.md)'
         }
