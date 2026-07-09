@@ -224,17 +224,23 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
     }
 
     Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
-    # Folders that already provide an explicit index page (any casing of index.md); a sibling
-    # <Group>.md in such a folder stays a normal page so it never overwrites the author-provided
-    # index page. Detected case-insensitively because the runner filesystem is case-sensitive.
-    $explicitIndexFolders = @(
-        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -File |
-            Where-Object { $_.Name -ieq 'index.md' } |
-            ForEach-Object { $_.Directory.FullName } |
-            Sort-Object -Unique
-    )
-    Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $file = $_
+    # Enumerate the public markdown once and reuse it (no second tree walk).
+    $publicMarkdownFiles = @(Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -File -Include '*.md')
+
+    # Folders that provide an explicit index page. Detected case-insensitively because the runner
+    # filesystem is case-sensitive. Two index pages that differ only by case (index.md and
+    # Index.md) are ambiguous, so fail fast instead of silently overwriting one.
+    $explicitIndexFolders = [System.Collections.Generic.HashSet[string]]::new()
+    $indexGroups = $publicMarkdownFiles | Where-Object { $_.Name -ieq 'index.md' } | Group-Object { $_.Directory.FullName }
+    foreach ($group in $indexGroups) {
+        if ($group.Count -gt 1) {
+            $names = ($group.Group.Name | Sort-Object) -join ', '
+            throw "Ambiguous section index in '$($group.Name)': multiple index pages ($names). Keep only one index.md."
+        }
+        [void]$explicitIndexFolders.Add($group.Name)
+    }
+
+    foreach ($file in $publicMarkdownFiles) {
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
@@ -252,7 +258,7 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
             $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
             Write-Host '   Section index page detected - publishing as index.md'
         } elseif ($file.BaseName -eq $parentFolderName) {
-            if ($parentFolder -in $explicitIndexFolders) {
+            if ($explicitIndexFolders.Contains($parentFolder)) {
                 Write-Warning "Ignoring group overview '$relPath' as the section index; folder already has an explicit index.md."
             } else {
                 $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
