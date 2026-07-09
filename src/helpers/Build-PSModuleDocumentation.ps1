@@ -224,13 +224,48 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
     }
 
     Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
-    Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $file = $_
+    # Enumerate the public markdown once and reuse it (no second tree walk).
+    $publicMarkdownFiles = @(Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -File -Include '*.md')
+
+    # Folders that provide an explicit index page. Detected case-insensitively because the runner
+    # filesystem is case-sensitive. Two index pages that differ only by case (index.md and
+    # Index.md) are ambiguous, so fail fast instead of silently overwriting one.
+    $explicitIndexFolders = [System.Collections.Generic.HashSet[string]]::new()
+    $indexGroups = $publicMarkdownFiles | Where-Object { $_.Name -ieq 'index.md' } | Group-Object { $_.Directory.FullName }
+    foreach ($group in $indexGroups) {
+        if ($group.Count -gt 1) {
+            $names = ($group.Group.Name | Sort-Object) -join ', '
+            throw "Ambiguous section index in '$($group.Name)': multiple index pages ($names). Keep only one index.md."
+        }
+        [void]$explicitIndexFolders.Add($group.Name)
+    }
+
+    foreach ($file in $publicMarkdownFiles) {
         $relPath = [System.IO.Path]::GetRelativePath($PublicFunctionsFolder.FullName, $file.FullName)
         Write-Host " - $relPath"
         Write-Host "   Path:     $file"
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $docsOutputFolder)
+
+        # A group's overview page becomes the section landing page (index.md) so the navigation
+        # shows it when the group is selected, instead of a page nested under the group. Authors
+        # can either name it after the folder (e.g. Auth/Auth.md) or provide Auth/index.md directly.
+        $parentFolder = Split-Path -Path $file.FullName -Parent
+        $parentFolderName = Split-Path -Path $parentFolder -Leaf
+        if ($file.Name -ieq 'index.md') {
+            # Normalize any casing (Index.md/INDEX.md) to index.md so it is treated as the
+            # section index on case-sensitive filesystems.
+            $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
+            Write-Host '   Section index page detected - publishing as index.md'
+        } elseif ($file.BaseName -eq $parentFolderName) {
+            if ($explicitIndexFolders.Contains($parentFolder)) {
+                Write-Warning "Ignoring group overview '$relPath' as the section index; folder already has an explicit index.md."
+            } else {
+                $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
+                Write-Host '   Group overview page detected - publishing as section index (index.md)'
+            }
+        }
+
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
