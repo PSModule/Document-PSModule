@@ -60,6 +60,23 @@ jobs:
           Name: PSModuleTest
           WorkingDirectory: tests/srcTestRepo
 
+      - name: Verify group overview pages publish as section index
+        shell: pwsh
+        run: |
+          $docs = 'tests/srcTestRepo/outputs/docs'
+          $expected = @('PSModule/index.md', 'SomethingElse/index.md')
+          $unexpected = @('PSModule/PSModule.md', 'SomethingElse/SomethingElse.md')
+          $failed = $false
+          foreach ($rel in $expected) {
+              if (Test-Path (Join-Path $docs $rel)) { Write-Host "OK  present: $rel" }
+              else { Write-Host "ERR missing: $rel"; $failed = $true }
+          }
+          foreach ($rel in $unexpected) {
+              if (Test-Path (Join-Path $docs $rel)) { Write-Host "ERR should not exist: $rel"; $failed = $true }
+              else { Write-Host "OK  absent:  $rel" }
+          }
+          if ($failed) { throw 'Group overview pages were not published as section index (index.md).' }
+
       - name: Lint documentation
         uses: super-linter/super-linter/slim@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
         env:

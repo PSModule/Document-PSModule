@@ -231,6 +231,16 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
         Write-Host "   Path:     $file"
 
         $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $docsOutputFolder)
+
+        # A group overview page named after its folder (e.g. Auth/Auth.md) is published as the
+        # section landing page (Auth/index.md) so the navigation shows it when the group is
+        # selected, instead of listing it as a separate page nested under the group.
+        $parentFolderName = Split-Path -Path (Split-Path -Path $file.FullName -Parent) -Leaf
+        if ($file.BaseName -eq $parentFolderName) {
+            $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
+            Write-Host '   Group overview page detected - publishing as section index (index.md)'
+        }
+
         Write-Host "   MD path:  $docsFilePath"
         $docsFolderPath = Split-Path -Path $docsFilePath -Parent
         $null = New-Item -Path $docsFolderPath -ItemType Directory -Force
