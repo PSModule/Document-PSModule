@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Install-PSModuleHelpers
-      uses: PSModule/Install-PSModuleHelpers@383aa36cd1b9dc838157cc4d08bb98cebc603216 # TEMP: fix/install-real-module-version (PSModule/Install-PSModuleHelpers#19)
+      uses: PSModule/Install-PSModuleHelpers@68e8ca76be679bfcb7099aed8cffa911c4ab72af # v1.0.8
 
     - name: Document-PSModule
       shell: pwsh
