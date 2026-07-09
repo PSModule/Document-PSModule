@@ -253,7 +253,7 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
             Write-Host '   Section index page detected - publishing as index.md'
         } elseif ($file.BaseName -eq $parentFolderName) {
             if ($parentFolder -in $explicitIndexFolders) {
-                Write-Warning "Group overview page '$relPath' is not used as the section index because the folder already has an explicit index.md; publishing it as a normal page."
+                Write-Warning "Ignoring group overview '$relPath' as the section index; folder already has an explicit index.md."
             } else {
                 $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
                 Write-Host '   Group overview page detected - publishing as section index (index.md)'
