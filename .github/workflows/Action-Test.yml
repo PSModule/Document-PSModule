@@ -64,8 +64,10 @@ jobs:
         shell: pwsh
         run: |
           $docs = 'tests/srcTestRepo/outputs/docs'
-          $expected = @('PSModule/index.md', 'SomethingElse/index.md')
-          $unexpected = @('PSModule/PSModule.md', 'SomethingElse/SomethingElse.md')
+          # PSModule: <Group>/<Group>.md mapped to index.md. SomethingElse: explicit index.md
+          # passthrough. Widgets: Index.md normalized to index.md (case-insensitive).
+          $expected = @('PSModule/index.md', 'SomethingElse/index.md', 'Widgets/index.md')
+          $unexpected = @('PSModule/PSModule.md', 'SomethingElse/SomethingElse.md', 'Widgets/Index.md')
           $failed = $false
           foreach ($rel in $expected) {
               if (Test-Path (Join-Path $docs $rel)) { Write-Host "OK  present: $rel" }

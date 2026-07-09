@@ -224,11 +224,14 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
     }
 
     Write-Host '::group::Build docs - Move markdown files from public functions folder to docs output folder'
-    # Folders that already provide an explicit index.md; a sibling <Group>.md in such a folder
-    # stays a normal page so it never overwrites the author-provided index.md.
+    # Folders that already provide an explicit index page (any casing of index.md); a sibling
+    # <Group>.md in such a folder stays a normal page so it never overwrites the author-provided
+    # index page. Detected case-insensitively because the runner filesystem is case-sensitive.
     $explicitIndexFolders = @(
-        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Filter 'index.md' |
-            ForEach-Object { $_.Directory.FullName }
+        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -File |
+            Where-Object { $_.Name -ieq 'index.md' } |
+            ForEach-Object { $_.Directory.FullName } |
+            Sort-Object -Unique
     )
     Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $file = $_
@@ -243,11 +246,18 @@ $(($successfulCommands | ForEach-Object { "- ``$($_.CommandName)`` `n" }) -join 
         # can either name it after the folder (e.g. Auth/Auth.md) or provide Auth/index.md directly.
         $parentFolder = Split-Path -Path $file.FullName -Parent
         $parentFolderName = Split-Path -Path $parentFolder -Leaf
-        if ($file.Name -eq 'index.md') {
-            Write-Host '   Section index page (index.md) - publishing as-is'
-        } elseif ($file.BaseName -eq $parentFolderName -and $parentFolder -notin $explicitIndexFolders) {
+        if ($file.Name -ieq 'index.md') {
+            # Normalize any casing (Index.md/INDEX.md) to index.md so it is treated as the
+            # section index on case-sensitive filesystems.
             $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
-            Write-Host '   Group overview page detected - publishing as section index (index.md)'
+            Write-Host '   Section index page detected - publishing as index.md'
+        } elseif ($file.BaseName -eq $parentFolderName) {
+            if ($parentFolder -in $explicitIndexFolders) {
+                Write-Warning "Group overview page '$relPath' is not used as the section index because the folder already has an explicit index.md; publishing it as a normal page."
+            } else {
+                $docsFilePath = Join-Path -Path (Split-Path -Path $docsFilePath -Parent) -ChildPath 'index.md'
+                Write-Host '   Group overview page detected - publishing as section index (index.md)'
+            }
         }
 
         Write-Host "   MD path:  $docsFilePath"
